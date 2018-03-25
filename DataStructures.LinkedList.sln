@@ -1,13 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2003
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStructures.LinkedList", "DataStructures.LinkedList\DataStructures.LinkedList.csproj", "{BCDBDDB8-520B-4234-B058-21EA2E4DB655}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DF1C20E2-1137-46C0-9938-550F1FD1CCC6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinkedList.UnitTests", "LinkedList.UnitTests\LinkedList.UnitTests.csproj", "{F245503B-AFDF-49AE-8BF1-8A732121BC02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataStructures.HashTable", "DataStructures.HashTable\DataStructures.HashTable.csproj", "{DA6A76D2-BC38-4D0E-823B-01FE7D808633}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HashTable.UnitTests", "HashTable.UnitTests\HashTable.UnitTests.csproj", "{B488212B-7A11-4C82-83AC-7480B5C5A0F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +27,21 @@ Global
 		{F245503B-AFDF-49AE-8BF1-8A732121BC02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F245503B-AFDF-49AE-8BF1-8A732121BC02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F245503B-AFDF-49AE-8BF1-8A732121BC02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA6A76D2-BC38-4D0E-823B-01FE7D808633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA6A76D2-BC38-4D0E-823B-01FE7D808633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA6A76D2-BC38-4D0E-823B-01FE7D808633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA6A76D2-BC38-4D0E-823B-01FE7D808633}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B488212B-7A11-4C82-83AC-7480B5C5A0F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B488212B-7A11-4C82-83AC-7480B5C5A0F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B488212B-7A11-4C82-83AC-7480B5C5A0F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B488212B-7A11-4C82-83AC-7480B5C5A0F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F245503B-AFDF-49AE-8BF1-8A732121BC02} = {DF1C20E2-1137-46C0-9938-550F1FD1CCC6}
+		{B488212B-7A11-4C82-83AC-7480B5C5A0F3} = {DF1C20E2-1137-46C0-9938-550F1FD1CCC6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {38B18587-A31D-4F41-B5ED-D00941CCA106}

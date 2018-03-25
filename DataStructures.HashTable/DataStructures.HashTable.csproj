@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{BCDBDDB8-520B-4234-B058-21EA2E4DB655}</ProjectGuid>
+    <ProjectGuid>{DA6A76D2-BC38-4D0E-823B-01FE7D808633}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DataStructures.LinkedList</RootNamespace>
-    <AssemblyName>DataStructures.LinkedList</AssemblyName>
+    <RootNamespace>DataStructures.HashTable</RootNamespace>
+    <AssemblyName>DataStructures.HashTable</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,8 +40,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Interfaces\ILinkedList.cs" />
-    <Compile Include="LinkedList.cs" />
+    <Compile Include="HashTable.cs" />
+    <Compile Include="Interfaces\IHashTable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
