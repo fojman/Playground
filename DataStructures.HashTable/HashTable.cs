@@ -8,11 +8,13 @@ namespace DataStructures.HashTable
      Requirements: 
 
     *  If setter tries to set null, such element must be removed from the dictionary.
-    *  Any .Net object can be used as a key or value.
+    *  Any .Net object can be used as a key or value. +
     *   If you try to add the object by a key which already exists in the hash table – throw an exception.
     *   If you try to get an element by key which does not exit in the has table – throw an exceptoin.
         --Cover it with unit tests
      */
+
+    // hash table with chaining collision resolution
 
     public class HashTable<TKey, TValue>: IHashTable<TKey, TValue>
         where TKey: IComparable<TKey>
@@ -20,10 +22,14 @@ namespace DataStructures.HashTable
         private EqualityComparer<TKey> _keyComparer = EqualityComparer<TKey>.Default;
         private EqualityComparer<TValue> _valueComparer = EqualityComparer<TValue>.Default;
 
-        private IList<Bucket>[]  _buckets1 = new List<Bucket>[100];
+
+
+
+
         private LinkedList<Bucket>[] _buckets;
 
         private int _size;
+        private int _freeSlots;
         private int _capacity;
 
         private const double LoadFactor = .75;
@@ -35,75 +41,100 @@ namespace DataStructures.HashTable
         {
             _buckets = new LinkedList<Bucket>[DefaultCapacity];
             _capacity = _buckets.Length;
+            _freeSlots = _buckets.Length;
             _size = 0;
         }
 
         public bool Contains(TKey key)
-        {
-            var hashCode = GetHashCodeForKey(key, _capacity);
+        {            
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
 
-            return _buckets[hashCode] != null &&
-                   _buckets[hashCode].Count > 0 &&
-                   _buckets[hashCode].Find(new Bucket {Key = key}) != null;
+            var bucketIndex = GetHashCodeImpl(key);
+
+            return _buckets[bucketIndex] != null &&
+                   _buckets[bucketIndex].Contains(new Bucket(key));
         }
 
         public void Add(TKey key, TValue value)
         {
-            var bucket = new Bucket {Key = key, Value = value};
-
-            // should we re-alloc storage
-            var reallocate =  (double)_size / _capacity >= LoadFactor;
-            if (reallocate)
+            if ((double)_freeSlots / _capacity > LoadFactor)
             {
-                var newSize = _capacity * 2; // todo: user ReallocateStrategy - i.e. 1/3, 2/3, etc; fibs ?
-
-                var newStorage = new LinkedList<Bucket>[newSize];
-
-                // we need recalculate hashes for increased size
-                for (var i = 0; i < _capacity; i++)
-                {
-                    newStorage[i] = _buckets[i];
-
-                    var currentNode = _buckets[i].First;
-                    while (currentNode != null)
-                    {
-                        var b = currentNode.Value;
-                        b.KeyHashCode = GetHashCodeForKey(b.Key, newSize);
-                        currentNode = currentNode.Next;
-                    }
-                }
-
+                Expand();
             }
+
+            AddImpl(key, value);
         }
 
-        
+        internal void Expand()
+        {
+            _capacity = _capacity * 2; // _capacity << 1;
+            var newStorage = new LinkedList<Bucket>[_capacity];
+            _freeSlots = newStorage.Length;
+
+            for (int i = 0; i < _buckets.Length; i++)
+            {
+                if (_buckets[i] != null)
+                {                    
+                    var current = _buckets[i].First;
+                    while (current != null)
+                    {
+                        var rawHash = current.Value.HashCode;
+                        var index = rawHash % _capacity;
+
+                        if (newStorage[index] == null)
+                        {
+                            newStorage[index] = new LinkedList<Bucket>();
+                            _freeSlots--;
+                        }
+
+                        newStorage[index].AddLast(current.Value);
+
+
+                        current = current.Next;
+                    }
+                }
+            }
+        }
 
         internal void AddImpl(TKey key, TValue value)
         {
-            var hashCode = GetHashCodeForKey(key, _capacity);
+            var rawHash = GetHashCodeImpl2(key) ;
+            var index = rawHash % _capacity;
 
-            if (_buckets[hashCode] == null)
+            var bucket = new Bucket(key, value, rawHash);
+
+            if (_buckets[index] == null) // first insertion into postion 'index'
             {
-                _buckets[hashCode] = new LinkedList<Bucket>();
+                _buckets[index] = new LinkedList<Bucket>();
+                _freeSlots--; // occupied
             }
-            else
+            else if (_buckets[index].Count > 0 && _buckets[index].Contains(bucket))
             {
-                var alredyContains = _buckets[hashCode].Find(new Bucket {Key = key}) != null;
-                if (alredyContains)
-                {
-                    throw new ArgumentException("Table alredy contains key");
-                }
+                throw new ArgumentException($"Table alredy contains key - {key}");
             }
 
-            _buckets[hashCode].AddLast(new Bucket {Key = key, Value = value, KeyHashCode = hashCode});
+            _buckets[index].AddLast(bucket);
 
-            _size++;        
+            _size++;
         }
 
+        // If setter tries to set null, such element must be removed from the dictionary.
+        // -   If you try to add the object by a key which already exists in the hash table – throw an exception.
+        // -   If you try to get an element by key which does not exit in the has table – throw an exceptoin.
         public TValue this[TKey key]
         {
-            get { throw new System.NotImplementedException(); }
-            set { throw new System.NotImplementedException(); }
+            get
+            {
+    
+            }
+
+            set
+            {
+
+            }
         }
 
         public bool TryGet(TKey key, out TValue value)
@@ -111,37 +142,61 @@ namespace DataStructures.HashTable
             throw new System.NotImplementedException();
         }
 
-
-        internal uint GetHashCodeForKey(TKey key, int lenght)
+        internal uint GetHashCodeImpl(TKey key)
         {
-            var code = key.GetHashCode(); // can return < 0
-            var absCode = Math.Abs(code); // only 0 or more
-
-            var normalizedCode = absCode % lenght;
-
-            return Convert.ToUInt32(normalizedCode);
+            return GetHashCodeImpl2(key) % (uint)_capacity;
         }
+
+        internal uint GetHashCodeImpl1(TKey key, int len)
+        {
+            return GetHashCodeImpl2(key) % (uint)len;
+        }
+
+        internal uint GetHashCodeImpl2(TKey key)
+        {
+            return Convert.ToUInt32(Math.Abs(_keyComparer.GetHashCode(key)));
+        }
+
 
         internal class Bucket
         {
-            public TKey Key { get; set; }
+            public TKey Key { get; }
+            public TValue Value { get; }
 
-            public TValue Value { get; set; }
 
-            public uint KeyHashCode { get; set; }
+            // cached hash code value
+            // - used for avoiding hash recalculation during expacding storage, @see - expand/rehash
+            public uint HashCode { get; set; }
 
-            public bool Equals(Bucket bucket)
-            {
-                var equal = EqualityComparer<TKey>.Default.Equals(Key, bucket.Key);
-
-                return equal;
-            }
-
-            // ignoring warn as Bucket wont be used in any hash based data structure
             public override bool Equals(object obj)
             {
                 return Equals(obj as Bucket);
             }
+
+            private bool Equals(Bucket bucket)
+            {
+                return EqualityComparer<TKey>.Default.Equals(Key, bucket.Key);
+            }
+
+            public override int GetHashCode()
+            {
+                return Key.GetHashCode();
+            }
+
+            public Bucket(TKey key)
+            {
+                Key = key;
+            }
+
+            public Bucket(TKey key, TValue value, uint hashCode)
+            {
+                Key = key;
+                Value = value;
+                HashCode = hashCode;
+
+            }
         }
+
     }
+
 }

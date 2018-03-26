@@ -20,5 +20,30 @@ namespace HashTable.UnitTests
 
 
         }
+
+
+        [Test]
+        public void HashTable_NotRelated_Ok()
+        {
+            const int capacity = 17;
+
+            var emptyStringHashCode = string.Empty.GetHashCode();
+
+            var bucketes = new int[capacity];
+            foreach (var i in Enumerable.Range(0, 100600))
+            {
+                var code = i.GetHashCode();
+
+                bucketes[code % capacity]++;
+            }
+
+
+            for (int i = 0; i < bucketes.Length; i++)
+            {
+                Console.WriteLine($"B[{i}]={bucketes[i]}");
+            }
+
+            Assert.Fail("Intentionaly fails");
+        }
     }
 }
