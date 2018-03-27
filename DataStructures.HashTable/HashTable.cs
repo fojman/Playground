@@ -17,10 +17,10 @@ namespace DataStructures.HashTable
     // hash table with chaining collision resolution
 
     public class HashTable<TKey, TValue>: IHashTable<TKey, TValue>
-        where TKey: IComparable<TKey>
+        //where TKey: IComparable<TKey>
     {
-        private EqualityComparer<TKey> _keyComparer = EqualityComparer<TKey>.Default;
-        private EqualityComparer<TValue> _valueComparer = EqualityComparer<TValue>.Default;
+        private readonly EqualityComparer<TKey> _keyComparer = EqualityComparer<TKey>.Default;
+        private readonly EqualityComparer<TValue> _valueComparer = EqualityComparer<TValue>.Default;
 
 
 
@@ -97,11 +97,13 @@ namespace DataStructures.HashTable
                     }
                 }
             }
+
+            _buckets = newStorage;
         }
 
         internal void AddImpl(TKey key, TValue value)
         {
-            var rawHash = GetHashCodeImpl2(key) ;
+            var rawHash = GetRawHashCode(key) ;
             var index = rawHash % _capacity;
 
             var bucket = new Bucket(key, value, rawHash);
@@ -121,67 +123,108 @@ namespace DataStructures.HashTable
             _size++;
         }
 
-        // If setter tries to set null, such element must be removed from the dictionary.
+        
         // -   If you try to add the object by a key which already exists in the hash table – throw an exception.
         // -   If you try to get an element by key which does not exit in the has table – throw an exceptoin.
         public TValue this[TKey key]
         {
             get
             {
-    
+                TValue value;
+                if (TryGet(key, out value))
+                {
+                    return value;
+                }
+
+                throw new ArgumentException("There is no such key in table");
             }
 
+            // If setter tries to set null, such element must be removed from the dictionary.
             set
             {
+                // 
+                var index = GetRawHashCode(key) % _buckets.Length;
+                if (_buckets[index] != null)
+                {
+                    var bucket = new Bucket(key);
+                    var node = _buckets[index].Find(bucket);
+                    if (node == null)
+                    {
+                        throw new ArgumentException("There is no such key in table");
+                    }
 
+                    if (value == null)
+                    {
+                        _buckets[index].Remove(bucket); // remove element from list
+                        if (_buckets[index].Count == 0) // if list gets empty - remove list
+                        {
+                            _buckets[index] = null;
+                        }
+                    }
+                    else
+                    {
+                        node.Value.Value = value; // looks ugly!?
+                    }
+                }
             }
         }
 
         public bool TryGet(TKey key, out TValue value)
         {
-            throw new System.NotImplementedException();
+            value = default(TValue);
+
+            var index = GetRawHashCode(key) % _buckets.Length;
+            if (_buckets[index] != null)
+            {
+                var node = _buckets[index].Find(new Bucket(key));
+                if (node != null)
+                {
+                    value = node.Value.Value;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         internal uint GetHashCodeImpl(TKey key)
         {
-            return GetHashCodeImpl2(key) % (uint)_capacity;
+            return GetRawHashCode(key) % (uint)_capacity;
         }
 
         internal uint GetHashCodeImpl1(TKey key, int len)
         {
-            return GetHashCodeImpl2(key) % (uint)len;
+            return GetRawHashCode(key) % (uint)len;
         }
 
-        internal uint GetHashCodeImpl2(TKey key)
+        internal uint GetRawHashCode(TKey key)
         {
-            return Convert.ToUInt32(Math.Abs(_keyComparer.GetHashCode(key)));
+            var hc = _keyComparer.GetHashCode(key);
+
+            return Convert.ToUInt32(Math.Abs(hc));
         }
+            
 
 
+        // todo:
         internal class Bucket
         {
             public TKey Key { get; }
-            public TValue Value { get; }
+            public TValue Value { get; set; }
 
 
             // cached hash code value
             // - used for avoiding hash recalculation during expacding storage, @see - expand/rehash
             public uint HashCode { get; set; }
 
-            public override bool Equals(object obj)
-            {
-                return Equals(obj as Bucket);
-            }
+            public override bool Equals(object obj) => Equals(obj as Bucket);
 
             private bool Equals(Bucket bucket)
             {
-                return EqualityComparer<TKey>.Default.Equals(Key, bucket.Key);
+                return EqualityComparer<TKey>.Default.Equals(Key, bucket.Key); // does all required checks - null, type, etc.
             }
 
-            public override int GetHashCode()
-            {
-                return Key.GetHashCode();
-            }
+            public override int GetHashCode() => Key.GetHashCode();
 
             public Bucket(TKey key)
             {
@@ -196,7 +239,8 @@ namespace DataStructures.HashTable
 
             }
         }
-
     }
+
+
 
 }

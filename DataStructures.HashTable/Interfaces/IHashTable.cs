@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace DataStructures.HashTable.Interfaces
 {
     public interface IHashTable<TKey, TValue> //: IDictionary<TKey, TValue>
-        where TKey: IComparable<TKey>
+        //where TKey: IComparable<TKey>
     {
         /// <summary>
         /// Checks if table contains key

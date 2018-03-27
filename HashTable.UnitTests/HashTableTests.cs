@@ -10,40 +10,65 @@ namespace HashTable.UnitTests
 {
     public class HashTableTests
     {
+        public void SetUp()
+        {            
+        }
+
+        /*
+         Requirements: 
+
+        *  If setter tries to set null, such element must be removed from the dictionary.
+        *  Any .Net object can be used as a key or value. +
+        *   If you try to add the object by a key which already exists in the hash table – throw an exception.
+        *   If you try to get an element by key which does not exit in the has table – throw an exceptoin.
+            --Cover it with unit tests
+         */
+
         [Test]
         public void HashTable_Add_ShouldOk()
         {
-            var hashTable = new HashTable<int, int>();
+            var hashTable = new HashTable<string, string>();
 
-            hashTable.Add(key:1, value:1);
-            hashTable.Add(key: 1, value: 1);
+            hashTable.Add(key:"1", value:"sky");
+            //hashTable.Add(key: "1", value: 1);
+
+            hashTable["1"] = "one";
+
+
+            hashTable["1"] = null;
 
 
         }
 
 
         [Test]
-        public void HashTable_NotRelated_Ok()
+        public void HashTable_InsertCollidedItems_ShouldBeChained()
         {
-            const int capacity = 17;
 
-            var emptyStringHashCode = string.Empty.GetHashCode();
+            var table = new HashTable<Collided, string>();
 
-            var bucketes = new int[capacity];
-            foreach (var i in Enumerable.Range(0, 100600))
+            var key = new Collided();
+
+            table.Add(key, "first");
+            table.Add(key, "second");
+
+        }
+
+        // https://github.com/Skylenko/HashTable/blob/master/Test/Tests.cs
+
+        // simulate collision
+        internal class Collided//: IComparable<Collided>
+
+        {
+            public override bool Equals(object obj)
             {
-                var code = i.GetHashCode();
-
-                bucketes[code % capacity]++;
+                return false;
             }
 
-
-            for (int i = 0; i < bucketes.Length; i++)
+            public override int GetHashCode()
             {
-                Console.WriteLine($"B[{i}]={bucketes[i]}");
+                return 2018;
             }
-
-            Assert.Fail("Intentionaly fails");
         }
     }
 }
